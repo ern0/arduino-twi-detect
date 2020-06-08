@@ -12,11 +12,11 @@ void setup() {
 
 void loop() {
 
-	Serial.println("---- I2C/TWI scanner ----");
+	Serial.println("---- I2C/TWI address scanner ----");
 
-	for (int address = 0; address < 128; address++) {
+	for (int address = 1; address < 128; address++) {
 
-		Serial.print("$");
+		Serial.print("[$");
 		if (address < 0x10) Serial.print("0");
 		Serial.print(address,HEX);
 		Serial.print(":");
@@ -25,14 +25,15 @@ void loop() {
 		int error = Wire.endTransmission(true);
 
 		Serial.print(" ");
-		Serial.println(error);
-		delay(100);
-
-		if (error != 0) continue;
-
-		delay(100);
+		Serial.print(error);
+		if (error == 0) Serial.print(" - ### gotcha! ###");
+		Serial.print("]  ");
+		if ((address-1) %4 == 0) Serial.println();
+		delay(20);
 
 	} // for address
+
+	Serial.println();
 
 	delay(5555);
 
