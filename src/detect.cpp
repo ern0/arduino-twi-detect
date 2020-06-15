@@ -29,10 +29,10 @@ void loop() {
 		// Fetch value: ADT7410 device, Temperature register, 2-byte lenght
 		query(0x48,0,2);
 
-		Serial.println("--");
+		Serial.println("");
 	}
 
-	delay(5000);
+	delay(2000);
 
 } // loop()
 
@@ -50,20 +50,24 @@ void detect() {
 
 	Serial.println("---- I2C/TWI address scanner ----");
 
-	for (int address = 1; address < 128; address++) {
+	int col = 0;
+	for (int address = 0x38; address < 0x50; address++) {
 
-		Serial.print("[");
+		if (( (col % 4) == 0 ) && ( col != 0 )) Serial.println();
+		col++;
+
+		Serial.print(" ");
 		printHex(address);
-		Serial.print(":");
 
 		Wire.beginTransmission(address);
 		int error = Wire.endTransmission(true);
 
-		Serial.print(" ");
-		Serial.print(error);
-		if (error == 0) Serial.print(" - ### gotcha! ###");
-		Serial.print("]  ");
-		if ( (address % 4) == 0 ) Serial.println();
+		if (error == 0) {
+			Serial.print(" [X] ");
+		} else {
+			Serial.print(" [ ] ");
+		}
+
 		delay(10);
 
 	} // for address
