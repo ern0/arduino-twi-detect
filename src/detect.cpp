@@ -3,7 +3,7 @@
 
 
 void printHex(int value);
-void detect();
+void command(int addr, int reg, int value);
 void query(int addr, int reg, int len);
 
 
@@ -17,22 +17,42 @@ void setup() {
 
 void loop() {
 
-	detect();
-	Serial.println("--");
+	Serial.println("------- I2C/TWI address scanner -------");
 
-	// Fetch values from my attached devices
-	if (true) {
+	const int first = 0x00;
+	const int last = 0x7f;
+	const int increment = 1;
 
-		// Fetch value: INA219 device, Bus Voltage register, 2-byte length
-		query(0x40,2,2);
+	int col = 0;
+	for (int address = first; address <= last; address += increment) {
 
-		// Fetch value: ADT7410 device, Temperature register, 2-byte lenght
-		query(0x48,0,2);
+		if (( (col % 8) == 0 ) && ( col != 0 )) Serial.println();
+		col++;
 
-		Serial.println("--");
-	}
+		Serial.print(" ");
+		printHex(address);
 
-	delay(5000);
+		if (address == 0) {
+			Serial.print("-");
+			continue;
+		}
+
+		Wire.beginTransmission(address);
+		int error = Wire.endTransmission(true);
+
+		if (error == 0) {
+			Serial.print("*");
+		} else {
+			Serial.print(" ");
+		}
+
+		delay(10);
+
+	} // for address
+
+	Serial.println();
+
+	delay(4000);
 
 } // loop()
 
@@ -46,31 +66,24 @@ void printHex(int value) {
 } // printHex()
 
 
-void detect() {
+void command(int addr, int reg, int value) {
 
-	Serial.println("---- I2C/TWI address scanner ----");
+	Serial.print("Sending, addr=");
+	printHex(addr);
+	Serial.print(" reg=");
+	printHex(reg);
+	Serial.print(" value=");
+	printHex(value);
+	Serial.print(" ...");
 
-	for (int address = 1; address < 128; address++) {
+	Wire.beginTransmission(addr);
+	Wire.write(reg);
+	Wire.write(value);
+	Wire.endTransmission();
 
-		Serial.print("[");
-		printHex(address);
-		Serial.print(":");
+	Serial.println("");
 
-		Wire.beginTransmission(address);
-		int error = Wire.endTransmission(true);
-
-		Serial.print(" ");
-		Serial.print(error);
-		if (error == 0) Serial.print(" - ### gotcha! ###");
-		Serial.print("]  ");
-		if ( (address % 4) == 0 ) Serial.println();
-		delay(10);
-
-	} // for address
-
-	Serial.println();
-
-} // detect()
+} // command()
 
 
 void query(int addr, int reg, int len) {

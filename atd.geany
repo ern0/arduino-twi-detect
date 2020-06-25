@@ -20,10 +20,11 @@ indent_mode=2
 [project]
 name=arduino_twi_detect
 base_path=C:\\Users\\ezalka\\work\\arduino_twi_detect
+description=
 
 [long line marker]
 long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=0
+current_page=-1
