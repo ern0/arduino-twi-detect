@@ -5,9 +5,6 @@
 void printHex(int value);
 void command(int addr, int reg, int value);
 void query(int addr, int reg, int len);
-void discover(int first, int last);
-void swioTest();
-void muxTest();
 
 
 void setup() {
@@ -20,11 +17,42 @@ void setup() {
 
 void loop() {
 
-	Serial.println("");
+	Serial.println("------- I2C/TWI address scanner -------");
 
-	discover(0x00, 0xff);
-	//swioTest();
-	//muxTest();
+	const int first = 0x00;
+	const int last = 0x7f;
+	const int increment = 1;
+
+	int col = 0;
+	for (int address = first; address <= last; address += increment) {
+
+		if (( (col % 8) == 0 ) && ( col != 0 )) Serial.println();
+		col++;
+
+		Serial.print(" ");
+		printHex(address);
+
+		if (address == 0) {
+			Serial.print("-");
+			continue;
+		}
+
+		Wire.beginTransmission(address);
+		int error = Wire.endTransmission(true);
+
+		if (error == 0) {
+			Serial.print("*");
+		} else {
+			Serial.print(" ");
+		}
+
+		delay(10);
+
+	} // for address
+
+	Serial.println();
+
+	delay(4000);
 
 } // loop()
 
@@ -84,93 +112,3 @@ void query(int addr, int reg, int len) {
 	Serial.println();
 
 } // query()
-
-
-void discover(int first, int last) {
-
-	Serial.println("------- I2C/TWI address scanner -------");
-
-	int col = 0;
-	for (int address = first; address <= last; address++) {
-
-		if (( (col % 8) == 0 ) && ( col != 0 )) Serial.println();
-		col++;
-
-		Serial.print(" ");
-		printHex(address);
-
-		Wire.beginTransmission(address);
-		int error = Wire.endTransmission(true);
-
-		if (error == 0) {
-			Serial.print("*");
-		} else {
-			Serial.print(" ");
-		}
-
-		delay(10);
-
-	} // for address
-
-	Serial.println();
-
-	delay(1000);
-
-} // discover()
-
-
-void swioTest() {
-
-	// Turn RED on/off
-	command(0x42, 0x11, 1);
-	delay(300);
-	command(0x42, 0x11, 0);
-	delay(300);
-
-	// Turn GREEN on/off
-	command(0x42, 0x12, 1);
-	delay(300);
-	command(0x42, 0x12, 0);
-	delay(300);
-
-	// Turn BLUE on/off
-	command(0x42, 0x13, 1);
-	delay(300);
-	command(0x42, 0x13, 0);
-	delay(300);
-
-	// Set RGB to %111 (white), then turn off
-	command(0x42, 0x10, 0x07);
-	delay(1000);
-	command(0x42, 0x10, 0x00);
-	delay(1000);
-
-	// Set storage register $50 to 1, 2, 3, 4
-	command(0x42, 0x50, 1);
-	delay(300);
-	command(0x42, 0x50, 2);
-	delay(300);
-	command(0x42, 0x50, 3);
-	delay(300);
-	command(0x42, 0x50, 4);
-	delay(300);
-
-} // swioTest()
-
-
-void muxTest() {
-		// Fetch values from my attached devices
-	if (false) {
-
-		Serial.println("");
-
-		// Fetch value: INA219 device, Bus Voltage register, 2-byte length
-		query(0x42, 0x1e, 4);
-
-		// Fetch value: ADT7410 device, Temperature register, 2-byte lenght
-		query(0x48,0,2);
-	}
-
-	delay(100);
-
-} // muxTest()
